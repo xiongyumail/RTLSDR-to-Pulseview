@@ -46,14 +46,14 @@ void generateMetaFile(float sampleRate) {
 	sprintf(sampleRateStr,"samplerate=%f MHz\n",sampleRate/1e6*2);
 	writeString(f,sampleRateStr);
 	// writeString(f,"total probes=0\n");
-	writeString(f,"total analog=3\n");
+	writeString(f,"total analog=4\n");
 	// writeString(f,"total analog=1\n");
 
 	// probe names
 	writeString(f,"analog1=I\n");
 	writeString(f,"analog2=Q\n");
 	writeString(f,"analog3=AM\n");
-	// writeString(f,"analog4=FM\n");
+	writeString(f,"analog4=FM\n");
 	writeString(f,"unitsize=1\n");
 
 	close(f);
@@ -145,6 +145,7 @@ void generateAMFiles() {
 	float largestVal = 0;
 	// get max buffer size
 	while(inc < BUFF_SIZE) {
+		// Search largest value
 		float amVal = squares[buffData[inc]] + squares[buffData[inc+1]];
 		
 		if(amVal > largestVal) {
@@ -156,6 +157,7 @@ void generateAMFiles() {
 
 	inc = 0;
 	while(inc < BUFF_SIZE) {
+		// Resize value and write to file
 	
 		for(int j = 0 ; j < (4096/4) ; j++) {
 
@@ -260,7 +262,8 @@ char filesToZip[][64] = {
 	"version",
 	"analog-1-1-1",
 	"analog-1-2-1",
-	"analog-1-3-1"
+	"analog-1-3-1",
+	"analog-1-4-1"
 };
 
 int main(int argc, char** argv) {
@@ -325,7 +328,7 @@ int main(int argc, char** argv) {
 	// Generate wave files
 	generateIQFiles();
 	generateAMFiles();
-	// generateFMFiles();
+	generateFMFiles();
 
 	// merge into zip file
 	printf("Generating srzip\n");
@@ -336,14 +339,14 @@ int main(int argc, char** argv) {
 	int error = 0;
 	zip_t* archive = zip_open(srName, ZIP_CREATE, &error);
 
-	for(int i = 0 ; i < 5 ; i++) {
+	for(int i = 0 ; i < 6 ; i++) {
 		zip_source_t* source = zip_source_file(archive, filesToZip[i],0,0);
 		zip_file_add(archive, filesToZip[i],source,ZIP_FL_OVERWRITE);
 	}
 
 	zip_close(archive);
 
-	for(int i = 0 ; i < 5 ; i++) {
+	for(int i = 0 ; i < 6 ; i++) {
 		unlink(filesToZip[i]);	
 	}
 
